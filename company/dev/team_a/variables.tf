@@ -11,13 +11,13 @@ variable "datadog_app_key" {
 }
 
 variable "main_tags" {
-  default = "owner:team_b,env:prod"
+  default = "owner:team_a,env:dev"
 }
 
 variable "notifications" {
   type = map
   default = {
-    email = "@john@doe.com @john@smith.com"
-    slack = "@slack-my_channel"
+    email = ""
+    slack = ""
   }
 }

@@ -1,0 +1,4 @@
+# Dogfood
+datadog_api_url="https://api.datadoghq.com/"
+datadog_api_key="abc"
+datadog_app_key="cde"

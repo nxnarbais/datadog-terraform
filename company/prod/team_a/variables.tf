@@ -11,7 +11,7 @@ variable "datadog_app_key" {
 }
 
 variable "main_tags" {
-  default = "owner:team_a"
+  default = "owner:team_a,env:prod"
 }
 
 variable "notifications" {
