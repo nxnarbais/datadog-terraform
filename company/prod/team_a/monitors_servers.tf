@@ -1,4 +1,4 @@
-module "prod_low_mem_usable" {
+module "system" {
   source = "../../../modules/system"
   selected_tags = "${var.main_tags}"
   notifications = {

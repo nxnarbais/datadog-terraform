@@ -24,7 +24,3 @@ To create a new project for your team:
 2. Run `terraform init`
 3. Run `terraform plan`
 4. Run `terraform apply`
-
-## TODO
-
-- Setup an example with `source      = "github.com/username/repo_name?ref=1.0"` to use module versioning

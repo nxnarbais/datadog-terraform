@@ -19,6 +19,10 @@ Here is an example of structure where the each environment and team can have a d
 
 - Utilization of a templated service dashboard (timeboard).
 
+## prod > team_e
+
+- Utilization of a remote versioned source
+
 ## dev > team_a
 
 - Utilization of a service module
