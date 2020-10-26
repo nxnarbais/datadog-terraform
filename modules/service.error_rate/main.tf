@@ -10,7 +10,7 @@ resource "datadog_monitor" "service_error_rate" {
   type                = "metric alert"
   name                = "[Service] Error rate high on {{service.name}}"
   query               = <<EOF
-sum(last_1h):100 * sum:${var.metrics.errors}{env:${var.env},${var.selected_tags}!exception_service_error_rate:true} by {env,team,service}.as_rate() / sum:${var.metrics.hits}{env:${var.env},${var.selected_tags}!exception_service_error_rate:true} by {env,team,service}.as_rate() > ${var.thresholds.alert}
+sum(last_1h):(100 * sum:${var.metrics.errors}{env:${var.env},${var.selected_tags},!exception_service_error_rate:true} by {env,team,service}.as_rate() / sum:${var.metrics.hits}{env:${var.env},${var.selected_tags},!exception_service_error_rate:true} by {env,team,service}.as_rate()) > ${var.thresholds.alert}
 EOF
   message = <<EOF
 {{#is_alert}}

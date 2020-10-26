@@ -10,9 +10,8 @@ variable "datadog_app_key" {
   default = ""
 }
 
-variable "selected_tags" {
-  description = "Selected tags"
-  default = ""
+variable "main_tags" {
+  default = "owner:team_a,env:prod"
 }
 
 variable "notifications" {

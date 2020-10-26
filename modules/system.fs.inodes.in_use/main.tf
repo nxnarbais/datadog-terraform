@@ -1,6 +1,6 @@
-data "template_file" "system_mem_pct_usable" {
+data "template_file" "system_fs_inodes_in_use" {
   template = file(
-    "${path.module}/system.mem.pct_usable.tpl",
+    "${path.module}/system.fs.inodes.in_use.tpl",
   )
 
   vars = {
@@ -11,13 +11,13 @@ data "template_file" "system_mem_pct_usable" {
   }
 }
 
-resource "datadog_monitor" "system_mem_pct_usable" {
+resource "datadog_monitor" "system_fs_inodes_in_use" {
   type                = "metric alert"
-  name                = "Low memory usable {{host.name}}"
+  name                = "High inodes utilization"
   query               = <<EOF
-avg(last_15m):avg:system.mem.pct_usable{${var.selected_tags}} by {cloud_provider,env,host} < ${var.thresholds.alert}
+avg(last_5m):avg:system.fs.inodes.in_use{${var.selected_tags},!device:/dev/loop0,!device:/dev/loop1,!device:/dev/loop2,!device:/dev/loop4,!device:/dev/loop3} by {cloud_provider,env,host,device} > ${var.thresholds.alert}
 EOF
-  message = data.template_file.system_mem_pct_usable.rendered
+  message = data.template_file.system_fs_inodes_in_use.rendered
   thresholds = {
     critical          = var.thresholds.alert
     warning           = var.thresholds.warn
@@ -30,5 +30,5 @@ EOF
   locked              = var.locked # A boolean indicating whether changes to to this monitor should be restricted to the creator or admins. Defaults to False.
   # timeout_h           = 3 # The number of hours of the monitor not reporting data before it will automatically resolve (Mostly for sparce metrics or event monitors)
 
-  count = var.system_mem_pct_usable_enabled == "true" ? 1 : 0
+  count = var.system_fs_inodes_in_use_enabled == "true" ? 1 : 0
 }

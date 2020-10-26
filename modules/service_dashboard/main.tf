@@ -28,7 +28,7 @@ resource "datadog_dashboard" "ordered_dashboard" {
       content = <<EOF
 # Troubleshooting: $service.value - $env.value
 
-[repository](https://github.com/nxnarbais/terraform-datadog)
+[Terraform Repo](https://github.com/nxnarbais/terraform-datadog)
 EOF
     }
   }

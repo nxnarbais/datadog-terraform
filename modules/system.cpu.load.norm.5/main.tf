@@ -1,6 +1,6 @@
-data "template_file" "system_mem_pct_usable" {
+data "template_file" "system_cpu_load_norm_5" {
   template = file(
-    "${path.module}/system.mem.pct_usable.tpl",
+    "${path.module}/system.cpu.load.norm.5.tpl",
   )
 
   vars = {
@@ -11,13 +11,13 @@ data "template_file" "system_mem_pct_usable" {
   }
 }
 
-resource "datadog_monitor" "system_mem_pct_usable" {
+resource "datadog_monitor" "system_cpu_load_norm_5" {
   type                = "metric alert"
-  name                = "Low memory usable {{host.name}}"
+  name                = "High cpu load {{host.name}}"
   query               = <<EOF
-avg(last_15m):avg:system.mem.pct_usable{${var.selected_tags}} by {cloud_provider,env,host} < ${var.thresholds.alert}
+avg(last_5m):avg:system.load.norm.5{${var.selected_tags}} by {cloud_provider,env,host} > ${var.thresholds.alert}
 EOF
-  message = data.template_file.system_mem_pct_usable.rendered
+  message = data.template_file.system_cpu_load_norm_5.rendered
   thresholds = {
     critical          = var.thresholds.alert
     warning           = var.thresholds.warn
@@ -30,5 +30,5 @@ EOF
   locked              = var.locked # A boolean indicating whether changes to to this monitor should be restricted to the creator or admins. Defaults to False.
   # timeout_h           = 3 # The number of hours of the monitor not reporting data before it will automatically resolve (Mostly for sparce metrics or event monitors)
 
-  count = var.system_mem_pct_usable_enabled == "true" ? 1 : 0
+  count = var.system_cpu_load_norm_5_enabled == "true" ? 1 : 0
 }

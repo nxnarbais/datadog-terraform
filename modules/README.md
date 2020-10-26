@@ -7,7 +7,27 @@
 
 ## System
 
-Include
+Module which include the modules below
+
+### CPU Idle
+
+- Check if the CPU idle is low
+
+### CPU Load Norm 5
+
+-  Check if the CPU load per core is high
+
+### Disk
+
+- Check if a disk has low space
+
+### Inodes
+
+- Check if the number of files is too high
+
+### Mem Usable
+
+- Check if the memory usable is low
 
 ## Service Dashboard
 

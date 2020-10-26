@@ -1,5 +1,5 @@
-variable "system_mem_pct_usable_enabled" {
-  description = "Enable monitor on system.mem.pct_usable"
+variable "system_cpu_idle_enabled" {
+  description = "Enable monitor on system.cpu.idle"
   default = "true"
 }
 
@@ -11,8 +11,8 @@ variable "selected_tags" {
 variable "thresholds" {
   type = map
   default = {
-    "alert"  = 0.1
-    "warn"   = 0.2
+    "alert"  = 10
+    "warn"   = 20
   }
 }
 
