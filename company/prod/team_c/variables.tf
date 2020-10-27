@@ -25,10 +25,20 @@ variable "cluster_name" {
   default = "my_cluster"
 }
 
+variable "jvm_enabled" {
+  description = "Set to true to have JVM metrics in the service dashboard"
+  default = "true"
+}
+
+variable "network_enabled" {
+  description = "Set to true to have Network data in the service dashboard"
+  default = "true"
+}
+
 variable "service" {
   type = map
   default = {
-    "service_name" = "my_service_name"
+    "service_name" = "my_service"
     "service_metric_root" = "trace.express.request"
     "service_operation_name" = "express.request"
   }

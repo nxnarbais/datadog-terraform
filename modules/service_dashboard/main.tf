@@ -1,9 +1,9 @@
 resource "datadog_dashboard" "ordered_dashboard" {
-  title         = "[Sandbox][KB] Terraform Service Dashboard"
+  title         = "[Sandbox][KB][TF] ${var.service["service_name"]} Service"
   description   = "Service dashboard blueprint to get started."
   layout_type   = "ordered"
   is_read_only  = true
-  notify_list = "${var.notify_list}" # TODO:
+  notify_list = var.notify_list # TODO:
   template_variable {
     name   = "env"
     prefix = "env"
@@ -12,7 +12,7 @@ resource "datadog_dashboard" "ordered_dashboard" {
   template_variable {
     name   = "service"
     prefix = "service"
-    default = "${var.service["service_name"]}"
+    default = var.service["service_name"]
   }
   dynamic "template_variable" {
     for_each = var.cluster_name == "cluster_name" ? [] : [1]
@@ -28,7 +28,21 @@ resource "datadog_dashboard" "ordered_dashboard" {
       content = <<EOF
 # Troubleshooting: $service.value - $env.value
 
+*Note: This dashboard is aimed to be seen with 2 columns.*
+
 [Terraform Repo](https://github.com/nxnarbais/terraform-datadog)
+EOF
+    }
+  }
+
+  widget {
+    note_definition {
+      content = <<EOF
+For additional troubleshooting ideas:
+
+- [Watchdog](/watchdog) to identify some unknown unknowns (aka blind spots)
+- [Correlation](https://docs.datadoghq.com/dashboards/correlations/#overview) to highlight some potential correlation. (Correlation does not mean causation!!)
+
 EOF
     }
   }
@@ -581,7 +595,7 @@ EOF
 
       widget {
         toplist_definition {
-          title = "Logs"
+          title = "Logs per service in environment"
           request {
             log_query {
               index = "main"
@@ -602,7 +616,7 @@ EOF
 
       widget {
         timeseries_definition {
-          title = "Logs"
+          title = "Logs for service"
           request {
             log_query {
               index = "main"
@@ -610,7 +624,7 @@ EOF
                 aggregation = "count"
               }
               search = {
-                query = "$env"
+                query = "$env $service"
               }
               group_by {
                 facet = "service"
@@ -624,7 +638,7 @@ EOF
 
       widget {
         timeseries_definition {
-          title = "Logs"
+          title = "Error logs for service"
           request {
             log_query {
               index = "main"
@@ -632,7 +646,7 @@ EOF
                 aggregation = "count"
               }
               search = {
-                query = "$env,status:error"
+                query = "$env $service status:error"
               }
               group_by {
                 facet = "service"
@@ -644,6 +658,87 @@ EOF
         }
       }
 
+    }
+  }
+
+  #######################################
+  # JVM
+  #######################################
+
+  dynamic "widget" {
+    for_each = var.jvm_enabled == "true" ? [1] : []
+    content {
+
+      group_definition {
+        layout_type = "ordered"
+        title = "JVM"
+
+        widget {
+          note_definition {
+            content = <<EOF
+## JVM
+
+- [JVM Metrics](/dash/integration/256/jvm-metrics?tpl_var_env=$env.value&tpl_var_service=$service.value)
+
+TODO: Add more relevant widget to this group
+EOF
+          }
+        }
+      }
+    }
+  }
+
+  #######################################
+  # APM - Trace Analytics
+  #######################################
+
+  dynamic "widget" {
+    for_each = var.jvm_enabled == "true" ? [1] : []
+    content {
+
+      group_definition {
+        layout_type = "ordered"
+        title = "Trace Analytics"
+
+        widget {
+          note_definition {
+            content = <<EOF
+## Trace Analytics
+
+- [Traces](/apm/traces?query=service:$service.value%20env:$env.value)
+- [Trace Analytics](/apm/analytics?query=service:$service.value%20env:$env.value)
+- Trace Outlier - Check on Trace Analytics for some outliers
+
+TODO: Add more relevant widget to this group based on the context the applicatino handle: latency per user tier, latency per cart value, errors per feature flag, errors per user tier, etc.
+EOF
+          }
+        }
+      }
+    }
+  }
+
+  #######################################
+  # NETWORK
+  #######################################
+
+  dynamic "widget" {
+    for_each = var.network_enabled == "true" ? [1] : []
+    content {
+
+      group_definition {
+        layout_type = "ordered"
+        title = "Network"
+
+        widget {
+          note_definition {
+            content = <<EOF
+## Network
+
+TODO: Add more relevant widget and links to this group
+EOF
+          }
+        }
+      }
     }
   }
 

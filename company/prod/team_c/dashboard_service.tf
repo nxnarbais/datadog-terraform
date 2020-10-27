@@ -6,4 +6,6 @@ module "prod_high_user_cpu" {
   service = var.service
   service_thresholds = var.service_thresholds
   service_dependencies = var.service_dependencies
+  jvm_enabled = var.jvm_enabled
+  network_enabled = var.network_enabled
 }

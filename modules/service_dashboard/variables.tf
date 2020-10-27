@@ -25,6 +25,16 @@ variable "cluster_name" {
   default = "cluster_name"
 }
 
+variable "jvm_enabled" {
+  description = "Set to true to have JVM metrics in the service dashboard"
+  default = "false"
+}
+
+variable "network_enabled" {
+  description = "Set to true to have Network data in the service dashboard"
+  default = "false"
+}
+
 variable "service" {
   type = map
   default = {
