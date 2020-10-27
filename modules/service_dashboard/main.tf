@@ -570,6 +570,45 @@ EOF
             }
           }
         }
+
+        widget {
+          timeseries_definition {
+            title = "CPU Free vs Limits"
+            request {
+              q= "(avg:kubernetes.cpu.limits{$env,$cluster_name} by {pod_name}-avg:kubernetes.cpu.usage.total{$env,$cluster_name} by {pod_name}/1000000000)/avg:kubernetes.cpu.limits{$env,$cluster_name} by {pod_name}"
+              display_type = "line"
+            }
+            marker {
+              display_type = "error solid"
+              value = "y < 0.1"
+              label = "< 0.1"
+            }
+            yaxis {
+              scale = "log"
+            }
+          }
+        }
+
+        widget {
+          timeseries_definition {
+            title = "Mem Free vs Limits"
+            request {
+              q= "(avg:kubernetes.memory.limits{$env,$geo,$cluster_name} by {pod_name}-avg:kubernetes.memory.usage{$env,$geo,$cluster_name} by {pod_name})/avg:kubernetes.memory.limits{$env,$geo,$cluster_name} by {pod_name}"
+              display_type = "line"
+            }
+            event {
+              q= "sources:kubernetes,docker tags:$env,$cluster_name priority:all OOM"
+            }
+            marker {
+              display_type = "error solid"
+              value = "y < 0.1"
+              label = "< 0.1"
+            }
+            yaxis {
+              scale = "log"
+            }
+          }
+        }
         
       }
       
