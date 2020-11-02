@@ -14,6 +14,10 @@ variable "main_tags" {
   default = "owner:team_a,env:prod"
 }
 
+variable "main_tags_in_array" {
+  default = ["owner:team_a", "env:prod"]
+}
+
 variable "notifications" {
   type = map
   default = {

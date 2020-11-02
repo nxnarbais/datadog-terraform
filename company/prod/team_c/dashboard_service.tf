@@ -1,5 +1,4 @@
-# All hosts from prod without exception
-module "prod_high_user_cpu" {
+module "service_dashboard_dependencies" {
   source = "../../../modules/service_dashboard"
   env = var.env
   cluster_name = var.cluster_name

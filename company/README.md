@@ -9,7 +9,8 @@ Here is an example of structure where the each environment and team can have a d
 ## prod > team_a
 
 - Utilization of the system module (which himself uses other more detailed system modules)
-- Additional monitor manually created
+- Additional monitor manually created (wihtout modules)
+- Utilization of Synthetic API module
 
 ## prod > team_b
 
