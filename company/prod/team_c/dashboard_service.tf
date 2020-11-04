@@ -8,3 +8,11 @@ module "service_dashboard_dependencies" {
   jvm_enabled = var.jvm_enabled
   network_enabled = var.network_enabled
 }
+
+module "service_dashboard_overview" {
+  source = "../../../modules/service_dashboard_overview"
+  env = var.env
+  service = var.service
+  service_thresholds = var.service_thresholds
+  dependency_dashboard_id = module.service_dashboard_dependencies.service_overview_dashboard_output
+}

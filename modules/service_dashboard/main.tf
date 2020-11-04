@@ -1,5 +1,5 @@
-resource "datadog_dashboard" "ordered_dashboard" {
-  title         = "[Sandbox][KB][TF] ${var.service["service_name"]} Service"
+resource "datadog_dashboard" "service_dependencies_dashboard" {
+  title         = "[Sandbox][KB][TF] ${var.service["service_name"]} Service Dependencies"
   description   = "Service dashboard blueprint to get started."
   layout_type   = "ordered"
   is_read_only  = true
@@ -63,6 +63,7 @@ EOF
 
 - [Service List](/apm/services?env=$env.value&search=$service.value)
 - [Traces](/apm/traces?query=service:$service.value%20env:$env.value)
+- [Monitors](/monitors/manage?q=service:$service.value&env:$env.value)
 EOF
 # FIXME: [Service Overview](/apm/service/$service.value/${var.service_operation_name}?env=$env.value)
         }
@@ -93,7 +94,7 @@ EOF
         timeseries_definition {
           title = "Error Rate"
           request {
-            q= "100*sum:${var.service["service_metric_root"]}.errors{$env,$service}.as_count().rollup(sum, 60) / sum:${var.service["service_metric_root"]}.hits{$geo,$service}.as_count().rollup(sum, 60)"
+            q= "100*sum:${var.service["service_metric_root"]}.errors{$env,$service}.as_count().rollup(sum, 60) / sum:${var.service["service_metric_root"]}.hits{$env,$service}.as_count().rollup(sum, 60)"
             display_type = "line"
           }
           marker {
@@ -108,7 +109,7 @@ EOF
         timeseries_definition {
           title = "Latency - p95 and p90"
           request {
-            q= "sum:${var.service["service_metric_root"]}.duration.by.service.95p{$env,$service}"
+            q= "avg:${var.service["service_metric_root"]}.duration.by.service.95p{$env,$service}"
             display_type = "line"
           }
           request {
@@ -127,7 +128,7 @@ EOF
         timeseries_definition {
           title = "Latency - p50"
           request {
-            q= "sum:${var.service["service_metric_root"]}.duration.by.service.50p{$env,$service}"
+            q= "avg:${var.service["service_metric_root"]}.duration.by.service.50p{$env,$service}"
             display_type = "line"
           }
           marker {
@@ -360,7 +361,7 @@ EOF
           timeseries_definition {
             title = "Error Rate"
             request {
-              q= "100*sum:${widget.value["service_metric_root"]}.errors{$env,service:${widget.value["service_name"]}}.as_count().rollup(sum, 60) / sum:${widget.value["service_metric_root"]}.hits{$geo,service:${widget.value["service_name"]}}.as_count().rollup(sum, 60)"
+              q= "100*sum:${widget.value["service_metric_root"]}.errors{$env,service:${widget.value["service_name"]}}.as_count().rollup(sum, 60) / sum:${widget.value["service_metric_root"]}.hits{$env,service:${widget.value["service_name"]}}.as_count().rollup(sum, 60)"
               display_type = "line"
             }
             marker {
@@ -593,7 +594,7 @@ EOF
           timeseries_definition {
             title = "Mem Free vs Limits"
             request {
-              q= "(avg:kubernetes.memory.limits{$env,$geo,$cluster_name} by {pod_name}-avg:kubernetes.memory.usage{$env,$geo,$cluster_name} by {pod_name})/avg:kubernetes.memory.limits{$env,$geo,$cluster_name} by {pod_name}"
+              q= "(avg:kubernetes.memory.limits{$env,$cluster_name} by {pod_name}-avg:kubernetes.memory.usage{$env,$cluster_name} by {pod_name})/avg:kubernetes.memory.limits{$env,$cluster_name} by {pod_name}"
               display_type = "line"
             }
             event {

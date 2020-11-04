@@ -47,6 +47,8 @@ variable "service" {
 variable "service_thresholds" {
   type = map
   default = {
+    "hit-rate-min" = "5"
+    "hit-rate-max" = "10"
     "error-rate" = "10"
     "latency-95p" = "0.10"
     "latency-50p" = "0.07"
