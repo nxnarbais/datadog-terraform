@@ -15,6 +15,11 @@ variable "notify_list" {
   default = ["my_email@company.com"]
 }
 
+variable "description" {
+  description = "Description of the dashboard"
+  default = "Service dashboard blueprint to get started."
+}
+
 variable "env" {
   description = "Default environment value"
   default = "prod"

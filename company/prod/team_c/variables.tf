@@ -44,6 +44,11 @@ variable "service" {
   }
 }
 
+variable "service_slo" {
+  description = "Main service SLO ID"
+  default = "123456789abcdefghijkl"
+}
+
 variable "service_thresholds" {
   type = map
   default = {

@@ -1,8 +1,8 @@
 resource "datadog_dashboard" "service_dependencies_dashboard" {
   title         = "[Sandbox][KB][TF] ${var.service["service_name"]} Service Dependencies"
-  description   = "Service dashboard blueprint to get started."
+  description   = var.description
   layout_type   = "ordered"
-  is_read_only  = true
+  is_read_only  = false # true: lock in edit by owner and admins
   notify_list = var.notify_list # TODO:
   template_variable {
     name   = "env"
@@ -177,7 +177,7 @@ EOF
         timeseries_definition {
           title = "Agent Running"
           request {
-            q= "anomalies(sum:datadog.agent.running{$env} by {host}, 'agile', 4)"
+            q= "anomalies(sum:datadog.agent.running{$env}, 'agile', 4)"
             display_type = "bars"
           }
           event {
@@ -638,7 +638,7 @@ EOF
           title = "Logs per service in environment"
           request {
             log_query {
-              index = "main"
+              index = "*"
               compute = {
                 aggregation = "count"
               }
@@ -659,7 +659,7 @@ EOF
           title = "Logs for service"
           request {
             log_query {
-              index = "main"
+              index = "*"
               compute = {
                 aggregation = "count"
               }
@@ -681,7 +681,7 @@ EOF
           title = "Error logs for service"
           request {
             log_query {
-              index = "main"
+              index = "*"
               compute = {
                 aggregation = "count"
               }

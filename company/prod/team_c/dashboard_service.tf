@@ -13,6 +13,7 @@ module "service_dashboard_overview" {
   source = "../../../modules/service_dashboard_overview"
   env = var.env
   service = var.service
+  service_slo = var.service_slo
   service_thresholds = var.service_thresholds
   dependency_dashboard_id = module.service_dashboard_dependencies.service_overview_dashboard_output
 }

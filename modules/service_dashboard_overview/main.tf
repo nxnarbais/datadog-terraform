@@ -1,6 +1,6 @@
 resource "datadog_dashboard" "service_overview_dashboard" {
   title         = "[Sandbox][KB][TF] ${var.service["service_name"]} Service Overview"
-  description   = "Service dashboard blueprint to get started."
+  description   = var.description
   layout_type   = "free"
   is_read_only  = true
   notify_list = var.notify_list
@@ -59,7 +59,7 @@ EOF
     service_level_objective_definition {
       title = "${var.service["service_name"]} SLOs"
       view_type = "detail"
-      slo_id = "3a5c8574eb61542db1729f062ba7d43d"
+      slo_id = var.service_slo
       show_error_budget = true
       view_mode = "overall"
       time_windows = ["7d","previous_week","30d"]

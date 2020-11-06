@@ -15,6 +15,11 @@ variable "notify_list" {
   default = ["my_email@company.com"]
 }
 
+variable "description" {
+  description = "Description of the dashboard"
+  default = "Service dashboard blueprint to get started."
+}
+
 variable "env" {
   description = "Default environment value"
   default = "prod"
@@ -38,6 +43,11 @@ variable "service_thresholds" {
     "latency-95p" = "0.10"
     # "latency-50p" = "0.07"
   }
+}
+
+variable "service_slo"{
+  description = "Main service SLO ID"
+  default = "3a5c8574eb61542db1729f062ba7d43d"
 }
 
 variable "dependency_dashboard_id" {
