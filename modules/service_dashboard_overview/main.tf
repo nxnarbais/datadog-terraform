@@ -107,7 +107,7 @@ EOF
   widget {
     query_value_definition {
       request {
-        q = "avg:${var.service["service_metric_root"]}.hits{$env,$service}.as_rate()"
+        q = "sum:${var.service["service_metric_root"]}.hits{$env,$service}.as_rate()"
         aggregator = "avg"
         conditional_formats {
           comparator = ">"
