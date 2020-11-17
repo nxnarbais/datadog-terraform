@@ -24,3 +24,7 @@ To create a new project for your team:
 2. Run `terraform init`
 3. Run `terraform plan`
 4. Run `terraform apply`
+
+## Other resources
+
+- Want to translate a dashboard / monitor exported JSON to a terraform file, [check this tool](https://github.com/laurmurclar/datadog-to-terraform).
