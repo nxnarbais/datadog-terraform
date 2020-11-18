@@ -9,6 +9,14 @@ resource "datadog_dashboard" "service_dependencies_dashboard" {
     prefix = "env"
     default = var.env
   }
+  dynamic "template_variable" {
+    for_each = var.secondary_primary_tag["key"] != "NA" ? [1] : []
+    content {
+      name   = var.secondary_primary_tag["key"]
+      prefix = var.secondary_primary_tag["key"]
+      default = var.secondary_primary_tag["value"]
+    }
+  }
   template_variable {
     name   = "service"
     prefix = "service"
@@ -61,9 +69,9 @@ EOF
           content = <<EOF
 ## Golden APM Metrics
 
-- [Service List](/apm/services?env=$env.value&search=$service.value)
-- [Traces](/apm/traces?query=service:$service.value%20env:$env.value)
-- [Monitors](/monitors/manage?q=service:$service.value env:$env.value)
+- [Service List](/apm/services?env=$env.value&search=$service.value&hostGroup=${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Traces](/apm/traces?query=service:$service.value%20env:$env.value%20${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Monitors](/monitors/manage?q=service:$service.value env:$env.value tag:${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
 EOF
 # FIXME: [Service Overview](/apm/service/$service.value/${var.service_operation_name}?env=$env.value)
         }
@@ -74,7 +82,7 @@ EOF
         timeseries_definition {
           title = "hits by version"
           request {
-            q= "sum:${var.service["service_metric_root"]}.hits{$env,$service} by {version}.as_count()"
+            q= "sum:${var.service["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service} by {version}.as_count()"
             display_type = "bars"
           }
         }
@@ -84,7 +92,7 @@ EOF
         timeseries_definition {
           title = "hits"
           request {
-            q= "anomalies(sum:${var.service["service_metric_root"]}.hits{$env,$service}.as_count(), 'agile', 5)"
+            q= "anomalies(sum:${var.service["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count(), 'agile', 5)"
             display_type = "line"
           }
         }
@@ -94,7 +102,7 @@ EOF
         timeseries_definition {
           title = "Error Rate"
           request {
-            q= "100*sum:${var.service["service_metric_root"]}.errors{$env,$service}.as_count().rollup(sum, 60) / sum:${var.service["service_metric_root"]}.hits{$env,$service}.as_count().rollup(sum, 60)"
+            q= "100*sum:${var.service["service_metric_root"]}.errors{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count().rollup(sum, 60) / sum:${var.service["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count().rollup(sum, 60)"
             display_type = "line"
           }
           marker {
@@ -109,11 +117,13 @@ EOF
         timeseries_definition {
           title = "Latency - p95 and p90"
           request {
-            q= "avg:${var.service["service_metric_root"]}.duration.by.service.95p{$env,$service}"
+            q = "avg:${var.service["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.95p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
+            # q= "avg:${var.service["service_metric_root"]}.duration.by.service.95p{$env,$service}"
             display_type = "line"
           }
           request {
-            q= "sum:${var.service["service_metric_root"]}.duration.by.service.90p{$env,$service}"
+            q = "avg:${var.service["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.90p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
+            # q= "sum:${var.service["service_metric_root"]}.duration.by.service.90p{$env,$service}"
             display_type = "line"
           }
           marker {
@@ -128,7 +138,8 @@ EOF
         timeseries_definition {
           title = "Latency - p50"
           request {
-            q= "avg:${var.service["service_metric_root"]}.duration.by.service.50p{$env,$service}"
+            q = "avg:${var.service["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.50p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
+            # q= "avg:${var.service["service_metric_root"]}.duration.by.service.50p{$env,$service}"
             display_type = "line"
           }
           marker {
@@ -143,7 +154,7 @@ EOF
         timeseries_definition {
           title = "Time Spent / Service"
           request {
-            q= "sum:${var.service["service_metric_root"]}.duration.by_service{$env,$service} by {sublayer_service}.rollup(sum).fill(zero) / sum:${var.service["service_metric_root"]}.duration.by_service{$env,$service}.rollup(sum).fill(zero) "
+            q = "sum:${var.service["service_metric_root"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},$service} by {sublayer_service}.rollup(sum).fill(zero) / sum:${var.service["service_metric_root"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.rollup(sum).fill(zero) "
             display_type = "area"
           }
         }
@@ -177,7 +188,7 @@ EOF
         timeseries_definition {
           title = "Agent Running"
           request {
-            q= "anomalies(sum:datadog.agent.running{$env}, 'agile', 4)"
+            q= "anomalies(sum:datadog.agent.running{$env,${"$"}${var.secondary_primary_tag["key"]}}, 'agile', 4)"
             display_type = "bars"
           }
           event {
@@ -190,7 +201,7 @@ EOF
         timeseries_definition {
           title = "CPU Idle"
           request {
-            q= "avg:system.cpu.idle{$env} by {host}"
+            q= "avg:system.cpu.idle{$env,${"$"}${var.secondary_primary_tag["key"]}} by {host}"
             display_type = "line"
           }
           marker {
@@ -213,7 +224,7 @@ EOF
         timeseries_definition {
           title = "CPU Idle - Load Balancing Check"
           request {
-            q= "outliers(avg:system.cpu.idle{$env} by {host}, 'DBSCAN', 3)"
+            q= "outliers(avg:system.cpu.idle{$env,${"$"}${var.secondary_primary_tag["key"]}} by {host}, 'DBSCAN', 3)"
             display_type = "line"
           }
         }
@@ -223,7 +234,7 @@ EOF
         timeseries_definition {
           title = "Mem Free"
           request {
-            q= "avg:system.mem.pct_usable{$env} by {host} * 100"
+            q= "avg:system.mem.pct_usable{$env,${"$"}${var.secondary_primary_tag["key"]}} by {host} * 100"
             display_type = "line"
           }
           marker {
@@ -246,7 +257,7 @@ EOF
         timeseries_definition {
           title = "Mem Free - Load Balancing Check"
           request {
-            q= "outliers(avg:system.mem.pct_usable{$env} by {host} * 100, 'DBSCAN', 3)"
+            q= "outliers(avg:system.mem.pct_usable{$env,${"$"}${var.secondary_primary_tag["key"]}} by {host} * 100, 'DBSCAN', 3)"
             display_type = "line"
           }
         }
@@ -256,7 +267,7 @@ EOF
         timeseries_definition {
           title = "Disk Free"
           request {
-            q= "sum:system.disk.free{$env} by {host}"
+            q= "sum:system.disk.free{$env,${"$"}${var.secondary_primary_tag["key"]}} by {host}"
             display_type = "line"
           }
           marker {
@@ -279,7 +290,7 @@ EOF
         timeseries_definition {
           title = "Inode usage"
           request {
-            q= "avg:system.fs.inodes.in_use{$env,!device:/dev/loop0,!device:/dev/loop1,!device:/dev/loop2,!device:/dev/loop4,!device:/dev/loop3} by {host,device} * 100"
+            q= "avg:system.fs.inodes.in_use{$env,${"$"}${var.secondary_primary_tag["key"]},!device:/dev/loop0,!device:/dev/loop1,!device:/dev/loop2,!device:/dev/loop4,!device:/dev/loop3} by {host,device} * 100"
             display_type = "line"
           }
           marker {
@@ -294,7 +305,7 @@ EOF
         timeseries_definition {
           title = "CPU Load 5 /core"
           request {
-            q= "avg:system.load.norm.5{$env} by {host}"
+            q= "avg:system.load.norm.5{$env,${"$"}${var.secondary_primary_tag["key"]}} by {host}"
             display_type = "line"
           }
           marker {
@@ -330,9 +341,10 @@ EOF
             content = <<EOF
 ## Golden APM Metrics - service:${widget.value["service_name"]}, $env
 
-- [Service Overview](/apm/service/${widget.value["service_name"]}/${widget.value["service_operation_name"]}?env=$env.value)
-- [Service List](/apm/services?env=$env.value&search=${widget.value["service_name"]})
-- [Traces](/apm/traces?query=service:${widget.value["service_name"]}%20env:$env.value)
+- [Service Overview](/apm/service/${widget.value["service_name"]}/${widget.value["service_operation_name"]}?env=$env.value&hostGroup=${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Service List](/apm/services?env=$env.value&search=${widget.value["service_name"]}&hostGroup=${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Traces](/apm/traces?query=service:${widget.value["service_name"]}%20env:$env.value%20${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Monitors](/monitors/manage?q=service:${widget.value["service_name"]} env:$env.value tag:${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
 EOF
           }
         }
@@ -341,7 +353,7 @@ EOF
           timeseries_definition {
             title = "hits"
             request {
-              q= "sum:${widget.value["service_metric_root"]}.hits{$env,service:${widget.value["service_name"]}} by {version}.as_count()"
+              q= "sum:${widget.value["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}} by {version}.as_count()"
               display_type = "bars"
             }
           }
@@ -351,7 +363,7 @@ EOF
           timeseries_definition {
             title = "hits"
             request {
-              q= "anomalies(sum:${widget.value["service_metric_root"]}.hits{$env,service:${widget.value["service_name"]}}.as_count(), 'agile', 5)"
+              q= "anomalies(sum:${widget.value["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}}.as_count(), 'agile', 5)"
               display_type = "line"
             }
           }
@@ -361,7 +373,7 @@ EOF
           timeseries_definition {
             title = "Error Rate"
             request {
-              q= "100*sum:${widget.value["service_metric_root"]}.errors{$env,service:${widget.value["service_name"]}}.as_count().rollup(sum, 60) / sum:${widget.value["service_metric_root"]}.hits{$env,service:${widget.value["service_name"]}}.as_count().rollup(sum, 60)"
+              q= "100*sum:${widget.value["service_metric_root"]}.errors{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}}.as_count().rollup(sum, 60) / sum:${widget.value["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}}.as_count().rollup(sum, 60)"
               display_type = "line"
             }
             marker {
@@ -376,11 +388,11 @@ EOF
           timeseries_definition {
             title = "Latency - p95 and p90"
             request {
-              q= "sum:${widget.value["service_metric_root"]}.duration.by.service.95p{$env,service:${widget.value["service_name"]}}"
+              q= "sum:${widget.value["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.95p{$env,service:${widget.value["service_name"]}}"
               display_type = "line"
             }
             request {
-              q= "sum:${widget.value["service_metric_root"]}.duration.by.service.90p{$env,service:${widget.value["service_name"]}}"
+              q= "sum:${widget.value["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.90p{$env,service:${widget.value["service_name"]}}"
               display_type = "line"
             }
             marker {
@@ -395,7 +407,7 @@ EOF
           timeseries_definition {
             title = "Latency - p50"
             request {
-              q= "sum:${widget.value["service_metric_root"]}.duration.by.service.50p{$env,service:${widget.value["service_name"]}}"
+              q= "sum:${widget.value["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.50p{$env,service:${widget.value["service_name"]}}"
               display_type = "line"
             }
             marker {
@@ -410,7 +422,7 @@ EOF
           timeseries_definition {
             title = "Time Spent / Service"
             request {
-              q= "sum:${widget.value["service_metric_root"]}.duration.by_service{$env,service:${widget.value["service_name"]}} by {sublayer_service}.rollup(sum).fill(zero) / sum:${widget.value["service_metric_root"]}.duration.by_service{$env,service:${widget.value["service_name"]}}.rollup(sum).fill(zero) "
+              q= "sum:${widget.value["service_metric_root"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}} by {sublayer_service}.rollup(sum).fill(zero) / sum:${widget.value["service_metric_root"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}}.rollup(sum).fill(zero) "
               display_type = "area"
             }
           }
@@ -450,7 +462,7 @@ EOF
           timeseries_definition {
             title = "Replica Pod Down"
             request {
-              q= "avg:kubernetes_state.deployment.replicas_desired{$env,$cluster_name} by {deployment}.rollup(avg, 900) - avg:kubernetes_state.deployment.replicas_ready{$env,$cluster_name} by {deployment}.rollup(avg, 900)"
+              q= "avg:kubernetes_state.deployment.replicas_desired{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {deployment}.rollup(avg, 900) - avg:kubernetes_state.deployment.replicas_ready{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {deployment}.rollup(avg, 900)"
               display_type = "line"
             }
             marker {
@@ -468,7 +480,7 @@ EOF
           timeseries_definition {
             title = "ImagePullBackOff"
             request {
-              q= "max:kubernetes_state.container.waiting{$env,$cluster_name,reason:imagepullbackoff} by {kube_namespace,pod_name}.rollup(max, 600)"
+              q= "max:kubernetes_state.container.waiting{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name,reason:imagepullbackoff} by {kube_namespace,pod_name}.rollup(max, 600)"
               display_type = "line"
             }
             marker {
@@ -486,7 +498,7 @@ EOF
           timeseries_definition {
             title = "Pod Restarting"
             request {
-              q= "exclude_null(avg:kubernetes.containers.restarts{$env,$cluster_name} by {pod_name}.rollup(avg, 300))-hour_before(exclude_null(avg:kubernetes.containers.restarts{$env,$cluster_name} by {pod_name}.rollup(avg, 300)))"
+              q= "exclude_null(avg:kubernetes.containers.restarts{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {pod_name}.rollup(avg, 300))-hour_before(exclude_null(avg:kubernetes.containers.restarts{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {pod_name}.rollup(avg, 300)))"
               display_type = "line"
             }
             marker {
@@ -504,7 +516,7 @@ EOF
           timeseries_definition {
             title = "Stateful Replicas Down"
             request {
-              q= "sum:kubernetes_state.statefulset.replicas_desired{$env,$cluster_name} by {statefulset} - sum:kubernetes_state.statefulset.replicas_ready{$env,$cluster_name} by {statefulset}.rollup(max,900)"
+              q= "sum:kubernetes_state.statefulset.replicas_desired{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {statefulset} - sum:kubernetes_state.statefulset.replicas_ready{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {statefulset}.rollup(max,900)"
               display_type = "line"
             }
             marker {
@@ -522,7 +534,7 @@ EOF
           timeseries_definition {
             title = "CrashLoopBackOff"
             request {
-              q= "max:kubernetes_state.container.waiting{$env,$cluster_name,reason:crashloopbackoff} by {kube_namespace,pod_name}.rollup(max, 600)"
+              q= "max:kubernetes_state.container.waiting{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name,reason:crashloopbackoff} by {kube_namespace,${"$"}${var.secondary_primary_tag["key"]},pod_name}.rollup(max, 600)"
               display_type = "line"
             }
             marker {
@@ -540,7 +552,7 @@ EOF
           timeseries_definition {
             title = "Failed Pods in Namespace"
             request {
-              q= "sum:kubernetes_state.pod.status_phase{$env,$cluster_name,phase:failed} by {kubernetes_cluster,kube_namespace} - hour_before(sum:kubernetes_state.pod.status_phase{$env,$cluster_name,phase:failed} by {kubernetes_cluster,kube_namespace})"
+              q= "sum:kubernetes_state.pod.status_phase{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name,phase:failed} by {kubernetes_cluster,kube_namespace} - hour_before(sum:kubernetes_state.pod.status_phase{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name,phase:failed} by {kubernetes_cluster,kube_namespace})"
               display_type = "line"
             }
             marker {
@@ -558,7 +570,7 @@ EOF
           timeseries_definition {
             title = "Nodes Unavailable"
             request {
-              q= "sum:kubernetes_state.node.status{$env,$cluster_name,status:schedulable} by {kubernetes_cluster}.rollup(max,900) * 100 / sum:kubernetes_state.node.status{$env,$cluster_name} by {kubernetes_cluster}.rollup(max,900)"
+              q= "sum:kubernetes_state.node.status{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name,status:schedulable} by {kubernetes_cluster}.rollup(max,900) * 100 / sum:kubernetes_state.node.status{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {kubernetes_cluster}.rollup(max,900)"
               display_type = "line"
             }
             marker {
@@ -576,7 +588,7 @@ EOF
           timeseries_definition {
             title = "CPU Free vs Limits"
             request {
-              q= "(avg:kubernetes.cpu.limits{$env,$cluster_name} by {pod_name}-avg:kubernetes.cpu.usage.total{$env,$cluster_name} by {pod_name}/1000000000)/avg:kubernetes.cpu.limits{$env,$cluster_name} by {pod_name}"
+              q= "(avg:kubernetes.cpu.limits{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {pod_name}-avg:kubernetes.cpu.usage.total{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {pod_name}/1000000000)/avg:kubernetes.cpu.limits{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {pod_name}"
               display_type = "line"
             }
             marker {
@@ -594,11 +606,11 @@ EOF
           timeseries_definition {
             title = "Mem Free vs Limits"
             request {
-              q= "(avg:kubernetes.memory.limits{$env,$cluster_name} by {pod_name}-avg:kubernetes.memory.usage{$env,$cluster_name} by {pod_name})/avg:kubernetes.memory.limits{$env,$cluster_name} by {pod_name}"
+              q= "(avg:kubernetes.memory.limits{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {pod_name}-avg:kubernetes.memory.usage{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {pod_name})/avg:kubernetes.memory.limits{$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name} by {pod_name}"
               display_type = "line"
             }
             event {
-              q= "sources:kubernetes,docker tags:$env,$cluster_name priority:all OOM"
+              q= "sources:kubernetes,docker tags:$env,${"$"}${var.secondary_primary_tag["key"]},$cluster_name priority:all OOM"
             }
             marker {
               display_type = "error solid"
@@ -643,7 +655,7 @@ EOF
                 aggregation = "count"
               }
               search = {
-                query = "$env"
+                query = "$env ${"$"}${var.secondary_primary_tag["key"]}"
               }
               group_by {
                 facet = "service"
@@ -664,7 +676,7 @@ EOF
                 aggregation = "count"
               }
               search = {
-                query = "$env $service"
+                query = "$env ${"$"}${var.secondary_primary_tag["key"]} $service"
               }
               group_by {
                 facet = "service"
@@ -686,7 +698,7 @@ EOF
                 aggregation = "count"
               }
               search = {
-                query = "$env $service status:error"
+                query = "$env ${"$"}${var.secondary_primary_tag["key"]} $service status:error"
               }
               group_by {
                 facet = "service"
@@ -745,8 +757,8 @@ EOF
             content = <<EOF
 ## Trace Analytics
 
-- [Traces](/apm/traces?query=service:$service.value%20env:$env.value)
-- [Trace Analytics](/apm/analytics?query=service:$service.value%20env:$env.value)
+- [Traces](/apm/traces?query=service:$service.value%20env:$env.value%20${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Traces Analytics](/apm/analytics?query=service:$service.value%20env:$env.value%20${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
 - Trace Outlier - Check on Trace Analytics for some outliers
 
 TODO: Add more relevant widget to this group based on the context the applicatino handle: latency per user tier, latency per cart value, errors per feature flag, errors per user tier, etc.
