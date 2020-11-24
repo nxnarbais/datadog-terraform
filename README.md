@@ -25,6 +25,23 @@ To create a new project for your team:
 3. Run `terraform plan`
 4. Run `terraform apply`
 
+## Tips: Import an asset from a remote resource
+
+A dashboard, monitor or any other resource is already available in Datadog and needs to be terraformed.
+
+Example for a monitor:
+
+1. Create empty ressource: 
+```
+resource "datadog_monitor" "MONITOR_NAME" {
+  # To fill
+}
+```
+2. terraform import datadog_monitor.MONITOR_NAME MONITOR_ID
+3. terraform state show 'datadog_monitor.MONITOR_NAME'
+4. get output and add it in the `# To fill`
+5. remove the id param and other params not supported
+
 ## Other resources
 
 - Want to translate a dashboard / monitor exported JSON to a terraform file, [check this tool](https://github.com/laurmurclar/datadog-to-terraform).
