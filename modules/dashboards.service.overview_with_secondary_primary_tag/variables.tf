@@ -1,15 +1,3 @@
-variable "datadog_api_url" {
-  default = "https://api.datadoghq.com/"
-}
-
-variable "datadog_api_key" {
-  default = ""
-}
-
-variable "datadog_app_key" {
-  default = ""
-}
-
 variable "notify_list" {
   description = "List of handles of users to notify when changes are made to this dashboard."
   default = ["my_email@company.com"]
@@ -25,12 +13,19 @@ variable "env" {
   default = "prod"
 }
 
+variable "secondary_primary_tag" {
+  description = "Set the key of the secondary primary tag and its default value"
+  default = {
+    "key" = "NA" # Must be different than NA for it to work
+    "value" = "emea"
+  }
+}
+
 variable "service" {
   type = map
   default = {
-    "service_name" = "my_service_name"
-    "service_metric_root" = "trace.express.request"
-    "service_operation_name" = "express.request"
+    "name" = "my_name"
+    "operation_name" = "express.request"
   }
 }
 

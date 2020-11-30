@@ -1,5 +1,5 @@
 resource "datadog_dashboard" "service_dependencies_dashboard" {
-  title         = "[Sandbox][KB][TF] ${var.service["service_name"]} Service Dependencies"
+  title         = "[Sandbox][KB][TF] ${var.service["name"]} Service Dependencies"
   description   = var.description
   layout_type   = "ordered"
   is_read_only  = false # true: lock in edit by owner and admins
@@ -20,7 +20,7 @@ resource "datadog_dashboard" "service_dependencies_dashboard" {
   template_variable {
     name   = "service"
     prefix = "service"
-    default = var.service["service_name"]
+    default = var.service["name"]
   }
   dynamic "template_variable" {
     for_each = var.cluster_name == "cluster_name" ? [] : [1]
@@ -73,7 +73,7 @@ EOF
 - [Traces](/apm/traces?query=service:$service.value%20env:$env.value%20${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
 - [Monitors](/monitors/manage?q=service:$service.value env:$env.value tag:${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
 EOF
-# FIXME: [Service Overview](/apm/service/$service.value/${var.service_operation_name}?env=$env.value)
+# FIXME: [Service Overview](/apm/service/$service.value/${var.operation_name}?env=$env.value)
         }
       }
 
@@ -82,7 +82,7 @@ EOF
         timeseries_definition {
           title = "hits by version"
           request {
-            q= "sum:${var.service["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service} by {version}.as_count()"
+            q= "sum:trace.${var.service["operation_name"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service} by {version}.as_count()"
             display_type = "bars"
           }
         }
@@ -92,7 +92,7 @@ EOF
         timeseries_definition {
           title = "hits"
           request {
-            q= "anomalies(sum:${var.service["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count(), 'agile', 5)"
+            q= "anomalies(sum:trace.${var.service["operation_name"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count(), 'agile', 5)"
             display_type = "line"
           }
         }
@@ -102,7 +102,7 @@ EOF
         timeseries_definition {
           title = "Error Rate"
           request {
-            q= "100*sum:${var.service["service_metric_root"]}.errors{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count().rollup(sum, 60) / sum:${var.service["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count().rollup(sum, 60)"
+            q= "100*sum:trace.${var.service["operation_name"]}.errors{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count().rollup(sum, 60) / sum:trace.${var.service["operation_name"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.as_count().rollup(sum, 60)"
             display_type = "line"
           }
           marker {
@@ -117,13 +117,13 @@ EOF
         timeseries_definition {
           title = "Latency - p95 and p90"
           request {
-            q = "avg:${var.service["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.95p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
-            # q= "avg:${var.service["service_metric_root"]}.duration.by.service.95p{$env,$service}"
+            q = "avg:trace.${var.service["operation_name"]}.duration.by.${var.secondary_primary_tag["key"]}_service.95p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
+            # q= "avg:trace.${var.service["operation_name"]}.duration.by.service.95p{$env,$service}"
             display_type = "line"
           }
           request {
-            q = "avg:${var.service["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.90p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
-            # q= "sum:${var.service["service_metric_root"]}.duration.by.service.90p{$env,$service}"
+            q = "avg:trace.${var.service["operation_name"]}.duration.by.${var.secondary_primary_tag["key"]}_service.90p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
+            # q= "sum:trace.${var.service["operation_name"]}.duration.by.service.90p{$env,$service}"
             display_type = "line"
           }
           marker {
@@ -138,8 +138,8 @@ EOF
         timeseries_definition {
           title = "Latency - p50"
           request {
-            q = "avg:${var.service["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.50p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
-            # q= "avg:${var.service["service_metric_root"]}.duration.by.service.50p{$env,$service}"
+            q = "avg:trace.${var.service["operation_name"]}.duration.by.${var.secondary_primary_tag["key"]}_service.50p{$env,${"$"}${var.secondary_primary_tag["key"]},$service}"
+            # q= "avg:trace.${var.service["operation_name"]}.duration.by.service.50p{$env,$service}"
             display_type = "line"
           }
           marker {
@@ -154,7 +154,7 @@ EOF
         timeseries_definition {
           title = "Time Spent / Service"
           request {
-            q = "sum:${var.service["service_metric_root"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},$service} by {sublayer_service}.rollup(sum).fill(zero) / sum:${var.service["service_metric_root"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.rollup(sum).fill(zero) "
+            q = "sum:trace.${var.service["operation_name"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},$service} by {sublayer_service}.rollup(sum).fill(zero) / sum:trace.${var.service["operation_name"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},$service}.rollup(sum).fill(zero) "
             display_type = "area"
           }
         }
@@ -334,17 +334,17 @@ EOF
 
       group_definition {
         layout_type = "ordered"
-        title = "Dependency: ${widget.value["service_name"]} - Golden APM Metrics"
+        title = "Dependency: ${widget.value["name"]} - Golden APM Metrics"
 
         widget {
           note_definition {
             content = <<EOF
-## Golden APM Metrics - service:${widget.value["service_name"]}, $env
+## Golden APM Metrics - service:${widget.value["name"]}, $env
 
-- [Service Overview](/apm/service/${widget.value["service_name"]}/${widget.value["service_operation_name"]}?env=$env.value&hostGroup=${"$"}${var.secondary_primary_tag["key"]}.value)
-- [Service List](/apm/services?env=$env.value&search=${widget.value["service_name"]}&hostGroup=${"$"}${var.secondary_primary_tag["key"]}.value)
-- [Traces](/apm/traces?query=service:${widget.value["service_name"]}%20env:$env.value%20${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
-- [Monitors](/monitors/manage?q=service:${widget.value["service_name"]} env:$env.value tag:${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Service Overview](/apm/service/${widget.value["name"]}/${widget.value["operation_name"]}?env=$env.value&hostGroup=${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Service List](/apm/services?env=$env.value&search=${widget.value["name"]}&hostGroup=${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Traces](/apm/traces?query=service:${widget.value["name"]}%20env:$env.value%20${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
+- [Monitors](/monitors/manage?q=service:${widget.value["name"]} env:$env.value tag:${var.secondary_primary_tag["key"]}:${"$"}${var.secondary_primary_tag["key"]}.value)
 EOF
           }
         }
@@ -353,7 +353,7 @@ EOF
           timeseries_definition {
             title = "hits"
             request {
-              q= "sum:${widget.value["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}} by {version}.as_count()"
+              q= "sum:trace.${widget.value["operation_name"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["name"]}} by {version}.as_count()"
               display_type = "bars"
             }
           }
@@ -363,7 +363,7 @@ EOF
           timeseries_definition {
             title = "hits"
             request {
-              q= "anomalies(sum:${widget.value["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}}.as_count(), 'agile', 5)"
+              q= "anomalies(sum:trace.${widget.value["operation_name"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["name"]}}.as_count(), 'agile', 5)"
               display_type = "line"
             }
           }
@@ -373,7 +373,7 @@ EOF
           timeseries_definition {
             title = "Error Rate"
             request {
-              q= "100*sum:${widget.value["service_metric_root"]}.errors{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}}.as_count().rollup(sum, 60) / sum:${widget.value["service_metric_root"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}}.as_count().rollup(sum, 60)"
+              q= "100*sum:trace.${widget.value["operation_name"]}.errors{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["name"]}}.as_count().rollup(sum, 60) / sum:trace.${widget.value["operation_name"]}.hits{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["name"]}}.as_count().rollup(sum, 60)"
               display_type = "line"
             }
             marker {
@@ -388,11 +388,11 @@ EOF
           timeseries_definition {
             title = "Latency - p95 and p90"
             request {
-              q= "sum:${widget.value["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.95p{$env,service:${widget.value["service_name"]}}"
+              q= "sum:trace.${widget.value["operation_name"]}.duration.by.${var.secondary_primary_tag["key"]}_service.95p{$env,service:${widget.value["name"]}}"
               display_type = "line"
             }
             request {
-              q= "sum:${widget.value["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.90p{$env,service:${widget.value["service_name"]}}"
+              q= "sum:trace.${widget.value["operation_name"]}.duration.by.${var.secondary_primary_tag["key"]}_service.90p{$env,service:${widget.value["name"]}}"
               display_type = "line"
             }
             marker {
@@ -407,7 +407,7 @@ EOF
           timeseries_definition {
             title = "Latency - p50"
             request {
-              q= "sum:${widget.value["service_metric_root"]}.duration.by.${var.secondary_primary_tag["key"]}_service.50p{$env,service:${widget.value["service_name"]}}"
+              q= "sum:trace.${widget.value["operation_name"]}.duration.by.${var.secondary_primary_tag["key"]}_service.50p{$env,service:${widget.value["name"]}}"
               display_type = "line"
             }
             marker {
@@ -422,7 +422,7 @@ EOF
           timeseries_definition {
             title = "Time Spent / Service"
             request {
-              q= "sum:${widget.value["service_metric_root"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}} by {sublayer_service}.rollup(sum).fill(zero) / sum:${widget.value["service_metric_root"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["service_name"]}}.rollup(sum).fill(zero) "
+              q= "sum:trace.${widget.value["operation_name"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["name"]}} by {sublayer_service}.rollup(sum).fill(zero) / sum:trace.${widget.value["operation_name"]}.duration.by_service{$env,${"$"}${var.secondary_primary_tag["key"]},service:${widget.value["name"]}}.rollup(sum).fill(zero) "
               display_type = "area"
             }
           }

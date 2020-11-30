@@ -38,9 +38,9 @@ variable "network_enabled" {
 variable "service" {
   type = map
   default = {
-    "service_name" = "my_service"
+    "name" = "my_service"
     "service_metric_root" = "trace.express.request"
-    "service_operation_name" = "express.request"
+    "operation_name" = "express.request"
   }
 }
 
@@ -63,18 +63,18 @@ variable "service_thresholds" {
 variable "service_dependencies" {
   type = list
   default = [{
-    "service_name" = "my_service-mongodb"
+    "name" = "my_service-mongodb"
     "service_metric_root" = "trace.mongodb.query"
-    "service_operation_name" = "mongodb.query"
+    "operation_name" = "mongodb.query"
     "thresholds" = {
       "error-rate" = "5"
       "latency-95p" = "0.05"
       "latency-50p" = "0.03"
     }
   }, {
-    "service_name" = "my_service-fs"
+    "name" = "my_service-fs"
     "service_metric_root" = "trace.fs.operation"
-    "service_operation_name" = "fs.operation"
+    "operation_name" = "fs.operation"
     "thresholds" = {
       "error-rate" = "5"
       "latency-95p" = "0.03"

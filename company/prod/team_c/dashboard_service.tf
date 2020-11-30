@@ -1,5 +1,5 @@
 module "service_dashboard_dependencies" {
-  source = "../../../modules/service_dashboard"
+  source = "../../../modules/dashboards.service.dependencies"
   env = var.env
   cluster_name = var.cluster_name
   service = var.service
@@ -10,7 +10,7 @@ module "service_dashboard_dependencies" {
 }
 
 module "service_dashboard_overview" {
-  source = "../../../modules/service_dashboard_overview"
+  source = "../../../modules/dashboards.service.overview"
   env = var.env
   service = var.service
   service_slo = var.service_slo

@@ -1,15 +1,3 @@
-variable "datadog_api_url" {
-  default = "https://api.datadoghq.com/"
-}
-
-variable "datadog_api_key" {
-  default = ""
-}
-
-variable "datadog_app_key" {
-  default = ""
-}
-
 variable "notify_list" {
   description = "List of handles of users to notify when changes are made to this dashboard."
   default = ["my_email@company.com"]
@@ -51,9 +39,8 @@ variable "network_enabled" {
 variable "service" {
   type = map
   default = {
-    "service_name" = "my_service_name"
-    "service_metric_root" = "trace.express.request"
-    "service_operation_name" = "express.request"
+    "name" = "my_name"
+    "operation_name" = "express.request"
   }
 }
 
@@ -69,9 +56,8 @@ variable "service_thresholds" {
 variable "service_dependencies" {
   type = list
   default = [{
-    "service_name" = "mydb"
-    "service_metric_root" = "trace.mongodb.query"
-    "service_operation_name" = "mongodb.query"
+    "name" = "mydb"
+    "operation_name" = "mongodb.query"
     "thresholds" = {
       "error-rate" = "5"
       "latency-95p" = "0.05"
