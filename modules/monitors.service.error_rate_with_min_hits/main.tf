@@ -22,7 +22,7 @@ resource "datadog_monitor" "service_error_rate" {
   type                = "metric alert"
   name                = "[Service][Composite] Error rate high on ${var.service.name}"
   query               = <<EOF
-sum(last_15m):(100 * sum:trace.${var.service.operation_name}.error{env:${var.env},service:${var.service.name}} by {env,team,service}.as_rate() / sum:trace.${var.service.operation_name}.hit{env:${var.env},service:${var.service.name}} by {env,team,service}.as_rate()) > ${var.thresholds.alert}
+sum(last_15m):(100 * sum:trace.${var.service.operation_name}.errors{env:${var.env},service:${var.service.name}}.as_rate() / sum:trace.${var.service.operation_name}.hits{env:${var.env},service:${var.service.name}}.as_rate()) > ${var.thresholds.alert}
 EOF
   message = data.template_file.message_error_rate.rendered
   thresholds = {
@@ -40,7 +40,7 @@ resource "datadog_monitor" "service_min_hits" {
   type                = "metric alert"
   name                = "[Service][Composite] Traffic too low ${var.service.name}"
   query               = <<EOF
-sum(last_1h):sum:trace.${var.service.operation_name}.hit{env:${var.env},service:${var.service.name}} by {env,team,service}.as_count() < ${var.minimum_hit_rate}
+sum(last_1h):sum:trace.${var.service.operation_name}.hits{env:${var.env},service:${var.service.name}}.as_count() < ${var.minimum_hit_rate}
 EOF
   message = <<EOF
 {{#is_alert}}

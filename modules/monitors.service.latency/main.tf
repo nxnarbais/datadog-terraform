@@ -16,7 +16,7 @@ resource "datadog_monitor" "service_latency" {
   type                = "metric alert"
   name                = "[Service] Latency is high on ${var.service.name}"
   query               = <<EOF
-avg(last_15m):avg:trace.${var.service.operation_name}.duration.by.service.${var.latency_percentile}{env:${var.env},service:${var.service.name}} by {env,team,service}.as_rate() > ${var.thresholds.alert}
+avg(last_15m):avg:trace.${var.service.operation_name}.duration.by.service.${var.latency_percentile}{env:${var.env},service:${var.service.name}} > ${var.thresholds.alert}
 EOF
   message = data.template_file.message.rendered
   thresholds = {
