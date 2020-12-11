@@ -27,7 +27,7 @@ EOF
   notify_no_data      = true
   no_data_timeframe   = 30
   include_tags        = true
-  tags                = ["standard:true", "terraform:true", "env:${var.env}", "service:${var.service.name}", "owner:${var.owner}"]
+  tags                = concat(["standard:true", "terraform:true", "env:${var.env}", "service:${var.service.name}", "owner:${var.owner}"], var.tags)
 }
 
 

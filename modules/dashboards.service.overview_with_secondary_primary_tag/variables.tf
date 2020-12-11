@@ -49,3 +49,9 @@ variable "dependency_dashboard_id" {
   description = "ID of the dependency dashboard for investigation"
   default = "abc-def-ghi"
 }
+
+variable "tags" {
+  description = "List of custom tags to add" 
+  type = list
+  default = []
+}

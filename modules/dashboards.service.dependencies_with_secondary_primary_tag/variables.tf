@@ -65,3 +65,9 @@ variable "service_dependencies" {
     }
   }]
 }
+
+variable "tags" {
+  description = "List of custom tags to add" 
+  type = list
+  default = []
+}

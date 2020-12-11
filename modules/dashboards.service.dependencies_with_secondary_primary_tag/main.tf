@@ -1,6 +1,11 @@
 resource "datadog_dashboard" "service_dependencies_dashboard" {
   title         = "[Sandbox][KB][TF] ${var.service["name"]} Service Dependencies"
-  description   = var.description
+  description   = <<EOF
+${var.description}
+
+___
+tags: ${join(" ", var.tags)}
+EOF
   layout_type   = "ordered"
   is_read_only  = false # true: lock in edit by owner and admins
   # notify_list = var.notify_list # TODO:

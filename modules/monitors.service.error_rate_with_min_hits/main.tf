@@ -33,7 +33,7 @@ EOF
   notify_no_data      = true
   no_data_timeframe   = 30
   include_tags        = true
-  tags                = ["standard:true", "terraform:true", "composite:true", "env:${var.env}", "service:${var.service.name}", "owner:${var.owner}"]
+  tags                = concat(["standard:true", "terraform:true", "composite:true", "env:${var.env}", "service:${var.service.name}", "owner:${var.owner}"], var.tags)
 }
 
 resource "datadog_monitor" "service_min_hits" {
@@ -66,7 +66,7 @@ EOF
   notify_no_data      = true
   no_data_timeframe   = 120
   include_tags        = true
-  tags                = ["standard:true", "terraform:true", "composite:true", "env:${var.env}", "service:${var.service.name}", "owner:${var.owner}"]
+  tags                = concat(["standard:true", "terraform:true", "composite:true", "env:${var.env}", "service:${var.service.name}", "owner:${var.owner}"], var.tags)
 }
 
 resource "datadog_monitor" "service_error_rate_with_min_hit_rate" {
@@ -77,5 +77,5 @@ resource "datadog_monitor" "service_error_rate_with_min_hit_rate" {
 
   notify_no_data      = true
   include_tags        = true
-  tags                = ["standard:true", "terraform:true", "composite:true", "env:${var.env}", "service:${var.service.name}", "owner:${var.owner}"]
+  tags                = concat(["standard:true", "terraform:true", "composite:true", "env:${var.env}", "service:${var.service.name}", "owner:${var.owner}"], var.tags)
 }

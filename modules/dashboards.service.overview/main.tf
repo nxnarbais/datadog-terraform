@@ -1,6 +1,11 @@
 resource "datadog_dashboard" "service_overview_dashboard" {
   title         = "[Sandbox][KB][TF] ${var.service["name"]} Service Overview"
-  description   = var.description
+  description   = <<EOF
+${var.description}
+
+___
+tags: ${join(" ", var.tags)}
+EOF
   layout_type   = "free"
   is_read_only  = true
   # notify_list = var.notify_list
