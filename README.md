@@ -27,7 +27,8 @@ To create a new project for your team:
 
 ## Tips: Import an asset from a remote resource
 
-Check the Datadog documentation: [Importing Datadog Resources into Terraform](https://docs.datadoghq.com/integrations/faq/how-to-import-datadog-resources-into-terraform/#terraformer).
+1. Datadog documentation: [Importing Datadog Resources into Terraform](https://docs.datadoghq.com/integrations/faq/how-to-import-datadog-resources-into-terraform/#terraformer).
+1. Google Terraformer: [Repo](https://github.com/GoogleCloudPlatform/terraformer)
 
 ## Tips (old): Import an asset from a remote resource
 
