@@ -21,3 +21,6 @@
 **.tfvars
 **.tfstate
 .terraform
+
+# Tests
+team_test*/
