@@ -50,4 +50,5 @@ resource "datadog_monitor" "MONITOR_NAME" {
 ## Other resources
 
 - [Terraform monitors from Claranet](https://github.com/claranet/terraform-datadog-monitors#monitors-summary)
+- [CloudPosse Terraform Modules](https://github.com/cloudposse/terraform-datadog-platform)
 - Want to translate a dashboard / monitor exported JSON to a terraform file, [check this tool](https://github.com/laurmurclar/datadog-to-terraform).
